@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="percent">
+        <attr name="sweep_angle" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="CustomProgressBar">
+        <attr name="showCountText" format="boolean" />
+        <attr name="countDownTime" format="integer" />
+        <attr name="countDownTextSize" format="dimension" />
+        <attr name="countDownTextColor" format="color" />
+        <attr name="strokeWidth" format="float" />
+        <attr name="progressColor" format="color" />
+        <attr name="progressBgColor" format="color" />
+
+        <attr name="mode">
+            <enum name="linear" value="0" />
+            <enum name="round" value="1" />
+        </attr>
+    </declare-styleable>
+
+</resources>
