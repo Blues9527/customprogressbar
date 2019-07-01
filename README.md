@@ -1,2 +1,6 @@
-# customprogressbar
+# custom countdown progressbar
 带有倒计时功能的进度条
+
+1.圆形进度条带有文字倒计时提示
+2.水平进度条没有文字倒计时，可自行改进
+3.有自定义属性去设置进度条颜色，宽度，文字颜色，大小等
