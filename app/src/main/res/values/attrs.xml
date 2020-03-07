@@ -5,7 +5,7 @@
         <attr name="sweep_angle" format="float" />
     </declare-styleable>
 
-    <declare-styleable name="CustomProgressBar">
+    <declare-styleable name="CountDownProgressBar">
         <attr name="showCountText" format="boolean" />
         <attr name="countDownTime" format="integer" />
         <attr name="countDownTextSize" format="dimension" />

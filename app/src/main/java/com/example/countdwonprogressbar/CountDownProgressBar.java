@@ -1,5 +1,6 @@
 package com.example.countdwonprogressbar;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -9,7 +10,6 @@ import android.graphics.RectF;
 import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 
@@ -29,6 +29,7 @@ public class CountDownProgressBar extends View {
 
     private int max = 100;
 
+    //表示进度，值介于0~100之间
     private float progress = 0;
 
     private int radius = dp2px(15);
@@ -51,7 +52,7 @@ public class CountDownProgressBar extends View {
     //倒计时字体大小
     private float countDownTextSize;
 
-    //progress宽度
+    //progressbar宽度
     private float strokeWidth;
 
     //倒计时
@@ -60,10 +61,13 @@ public class CountDownProgressBar extends View {
     //形状,默认圆形
     private int progressShape;
 
+    //计时器，用于更新文本
     private CountDownTimer countDownTimer;
 
+    private CountDownTimerCallBack mCallBack;
+
     //倒计时间隔，默认1s
-    private long INTERVAL_DEFAULT = 1000;
+    private static final long INTERVAL_DEFAULT = 1000;
 
     public CountDownProgressBar(Context context) {
         this(context, null);
@@ -84,31 +88,31 @@ public class CountDownProgressBar extends View {
 
     private void initAttrs(Context context, AttributeSet attrs) {
 
-        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CustomProgressBar);
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CountDownProgressBar);
 
         //是否显示倒数文字
-        showCountText = ta.getBoolean(R.styleable.CustomProgressBar_showCountText, true);
+        showCountText = ta.getBoolean(R.styleable.CountDownProgressBar_showCountText, true);
 
         //倒计时
-        countDownText = ta.getInt(R.styleable.CustomProgressBar_countDownTime, 6);
+        countDownText = ta.getInt(R.styleable.CountDownProgressBar_countDownTime, 6);
 
         //倒数字体默认20sp
-        countDownTextSize = ta.getDimension(R.styleable.CustomProgressBar_countDownTextSize, 20);
+        countDownTextSize = ta.getDimension(R.styleable.CountDownProgressBar_countDownTextSize, 20);
 
         //倒计时颜色，默认黑色
-        countDownTextColor = ta.getColor(R.styleable.CustomProgressBar_countDownTextColor, 0xff000000);
+        countDownTextColor = ta.getColor(R.styleable.CountDownProgressBar_countDownTextColor, 0xff000000);
 
         //进度条宽度默认 5dp
-        strokeWidth = ta.getFloat(R.styleable.CustomProgressBar_strokeWidth, 5);
+        strokeWidth = ta.getFloat(R.styleable.CountDownProgressBar_strokeWidth, 5);
 
         //进度条进度默认蓝色
-        progressColor = ta.getColor(R.styleable.CustomProgressBar_progressColor, 0xff4b749d);
+        progressColor = ta.getColor(R.styleable.CountDownProgressBar_progressColor, 0xff4b749d);
 
         //背景默认灰色
-        progressBgColor = ta.getColor(R.styleable.CustomProgressBar_progressBgColor, 0xffededed);
+        progressBgColor = ta.getColor(R.styleable.CountDownProgressBar_progressBgColor, 0xffededed);
 
         //默认圆形
-        progressShape = ta.getInt(R.styleable.CustomProgressBar_mode, 1);
+        progressShape = ta.getInt(R.styleable.CountDownProgressBar_mode, 1);
 
         ta.recycle();
 
@@ -127,7 +131,6 @@ public class CountDownProgressBar extends View {
         } else {
             drawRoundProgressBar(canvas, mPaint);
         }
-
     }
 
     /**
@@ -147,7 +150,7 @@ public class CountDownProgressBar extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dp2px(strokeWidth));
         RectF oval = new RectF(centerX - radius, centerY - radius, radius + centerX, radius + centerY);
-        canvas.drawArc(oval, -90, getProgress(), false, paint);
+        canvas.drawArc(oval, -90, getAngle(), false, paint);
 
         if (showCountText) {
             paint.setStyle(Paint.Style.FILL);
@@ -179,13 +182,13 @@ public class CountDownProgressBar extends View {
         paint.setStyle(Paint.Style.FILL);
         paint.setStrokeWidth(dp2px(strokeWidth));
 
-        canvas.drawRoundRect(new RectF(0, 0, getWidth(), getHeight()), 0, 0, paint);
+        canvas.drawRoundRect(new RectF(0, 0, getWidth(), dp2px(strokeWidth)), 0, 0, paint);
 
         paint.setColor(progressColor);
         paint.setStyle(Paint.Style.FILL);
         paint.setStrokeWidth(dp2px(strokeWidth));
 
-        canvas.drawRoundRect(new RectF(0, 0, progress / 100 * getWidth(), getHeight()), 0, 0, paint);
+        canvas.drawRoundRect(new RectF(0, 0, getProgress() / 100 * getWidth(), dp2px(strokeWidth)), 0, 0, paint);
 
 
     }
@@ -195,7 +198,7 @@ public class CountDownProgressBar extends View {
      *
      * @param countDownText
      */
-    public void setCountDownText(int countDownText) {
+    private void setCountDownText(int countDownText) {
         this.countDownText = countDownText;
         postInvalidate();
     }
@@ -205,7 +208,7 @@ public class CountDownProgressBar extends View {
      *
      * @param progress
      */
-    public void setProgress(float progress) {
+    private void setProgress(float progress) {
         if (progress > 100)
             this.progress = max;
         else {
@@ -215,9 +218,20 @@ public class CountDownProgressBar extends View {
     }
 
     /**
-     * 获取进度，用于圆形progressbar去设置进度
+     * 获取当前进度，百分比
+     *
+     * @return 百分比
      */
     public float getProgress() {
+        return progress;
+    }
+
+    /**
+     * 获取当前进度对应圆形的角度
+     *
+     * @return 度数
+     */
+    public float getAngle() {
         float percent = 360 * (max - progress) / max;
         if (percent > 360)
             percent = 360;
@@ -225,21 +239,20 @@ public class CountDownProgressBar extends View {
         return percent;
     }
 
-    //圆形倒计时progressbar需要用到
-
     /**
-     * 开启倒计时
-     *
-     * @param millisInFuture
-     * @param countDownInterval
+     * 开启倒计时,圆形倒计时progressbar需要用到
      */
     public void startCountDown(long millisInFuture, long countDownInterval) {
         countDownTimer = new CountDownTimerImpl(millisInFuture, countDownInterval);
         countDownTimer.start();
+        //使用属性动画过度progress的更新，会更加圆滑
+        ObjectAnimator animator = ObjectAnimator.ofFloat(this, "progress", 100.0f, 0.0f);
+        animator.setDuration(millisInFuture);
+        animator.start();
     }
 
     /**
-     * onResume时候开启倒计时
+     * onResume时候开启倒计时，主要用于界面生命周期变化恢复倒计时
      */
     public void countDownResume() {
         if (countDownTimer != null) {
@@ -248,7 +261,7 @@ public class CountDownProgressBar extends View {
     }
 
     /**
-     * onStop或者是onPause的时候取消倒计时
+     * onStop或者是onPause的时候取消倒计时，主要用于界面生命周期变化取消倒计时
      */
     public void countDownCancel() {
         if (countDownTimer != null) {
@@ -258,23 +271,33 @@ public class CountDownProgressBar extends View {
 
     private class CountDownTimerImpl extends CountDownTimer {
 
-        private long millisInFuture;
-
         private CountDownTimerImpl(long millisInFuture, long countDownInterval) {
             super(millisInFuture, countDownInterval);
-            this.millisInFuture = millisInFuture;
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
             setCountDownText((int) (millisUntilFinished / 1000));
-            setProgress((float) (millisUntilFinished - 1000) / millisInFuture * 100);
+//            setProgress((float) (millisUntilFinished - 1000) / millisInFuture * 100);
         }
 
         @Override
         public void onFinish() {
-
+            if (getCountDownTimerCallBack() != null)
+                getCountDownTimerCallBack().onFinish();
         }
+    }
+
+    public interface CountDownTimerCallBack {
+        void onFinish();
+    }
+
+    public void setCountDownTimerCallBack(CountDownTimerCallBack callBack) {
+        mCallBack = callBack;
+    }
+
+    public CountDownTimerCallBack getCountDownTimerCallBack() {
+        return mCallBack;
     }
 
     // --------------工具方法-------------------//
@@ -285,9 +308,5 @@ public class CountDownProgressBar extends View {
 
     int px2sp(float px) {
         return (int) (getResources().getDisplayMetrics().scaledDensity * px);
-    }
-
-    void sendLog(String msg) {
-        Log.i("Blues", msg);
     }
 }
