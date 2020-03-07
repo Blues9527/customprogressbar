@@ -7,4 +7,24 @@
 
 > 2.水平进度条没有文字倒计时，可自行改进
 
-> 3.有自定义属性去设置进度条颜色，宽度，文字颜色，大小等
+### 自定义属性介绍
+属性 | 功能 | 备注
+---|---|---
+showCountText | 是否显示倒数文字(char) | 默认显示(true)/关闭(false)
+countDownText | 倒计时(int) | 默认5s(可自定义时长)
+countDownTextSize | 倒数字体(int) | 默认20sp(可自定义大小)
+countDownTextColor | 倒计时文本颜色 | 默认黑色(可自定义颜色)
+strokeWidth | 进度条宽度 | 默认5dp(可自定义大小)
+progressColor | 进度条进度颜色| 默认蓝色(可自定义颜色)
+progressBgColor | 背景颜色| 默认灰色(可自定义颜色)
+progressShape | 进度条形状 | 默认round(圆形进度条)/可选linear(水平进度条)
+
+### API介绍
+- setCountDownTimerCallBack(CountDownTimerCallBack callBack)//设置倒计时结束监听
+- countDownResume()     //界面恢复时继续倒计时
+- countDownCancel() //界面暂停时调用取消倒计时
+- getAngle() //获取圆形进度角度
+- getProgress() //获取进度百分比
+
+### 更新内容
+> 使用ObjectAnimator进行进度更新，使倒计时更加平滑

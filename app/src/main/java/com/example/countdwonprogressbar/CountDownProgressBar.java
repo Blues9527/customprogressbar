@@ -232,6 +232,9 @@ public class CountDownProgressBar extends View {
      * @return 度数
      */
     public float getAngle() {
+        if (progressShape != 1) {
+            return 0;
+        }
         float percent = 360 * (max - progress) / max;
         if (percent > 360)
             percent = 360;
@@ -242,7 +245,7 @@ public class CountDownProgressBar extends View {
     /**
      * 开启倒计时,圆形倒计时progressbar需要用到
      */
-    public void startCountDown(long millisInFuture, long countDownInterval) {
+    private void startCountDown(long millisInFuture, long countDownInterval) {
         countDownTimer = new CountDownTimerImpl(millisInFuture, countDownInterval);
         countDownTimer.start();
         //使用属性动画过度progress的更新，会更加圆滑
