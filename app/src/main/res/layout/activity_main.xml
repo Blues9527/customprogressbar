@@ -10,7 +10,9 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginTop="50dp"
-        app:countDownTime="15"
-        app:mode="round" />
+        app:countDownTime="5"
+        app:mode="round"
+        app:showCountText="true"
+        app:textSize="5sp" />
 
 </LinearLayout>

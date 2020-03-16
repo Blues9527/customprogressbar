@@ -2,6 +2,7 @@ package com.example.countdwonprogressbar;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,6 +14,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         cpb = findViewById(R.id.cpb);
+
+        cpb.setSkipListener(new CountDownProgressBar.SkipListener() {
+            @Override
+            public void onSkip() {
+                Log.i("Blues", "on skip");
+            }
+        });
     }
 
     @Override
